@@ -2041,7 +2041,7 @@ function delRpcTarget (oldRpc) {
     background.delCustomRpc(oldRpc, (err, result) => {
       if (err) {
         log.error(err)
-        return dispatch(self.displayWarning('Had a problem removing network!'))
+        return dispatch(actions.displayWarning('Had a problem removing network!'))
       }
       dispatch(actions.setSelectedToken())
     })
