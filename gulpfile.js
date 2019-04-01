@@ -195,6 +195,21 @@ gulp.task('manifest:production', function () {
   .pipe(gulp.dest('./dist/', { overwrite: true }))
 })
 
+gulp.task('manifest:testing', function () {
+  return gulp.src([
+    './dist/firefox/manifest.json',
+    './dist/chrome/manifest.json',
+  ], {base: './dist/'})
+
+  // Exclude chromereload script in production:
+  .pipe(jsoneditor(function (json) {
+    json.permissions = [...json.permissions, 'webRequestBlocking']
+    return json
+  }))
+
+  .pipe(gulp.dest('./dist/', { overwrite: true }))
+})
+
 gulp.task('copy',
   gulp.series(
     gulp.parallel(...copyTaskNames),
@@ -209,6 +224,15 @@ gulp.task('dev:copy',
     gulp.parallel(...copyDevTaskNames),
     'manifest:chrome',
     'manifest:opera'
+  )
+)
+
+gulp.task('test:copy',
+  gulp.series(
+    gulp.parallel(...copyDevTaskNames),
+    'manifest:chrome',
+    'manifest:opera',
+    'manifest:testing'
   )
 )
 
@@ -287,7 +311,12 @@ const buildJsFiles = [
 // bundle tasks
 createTasksForBuildJsUIDeps({ dependenciesToBundle: uiDependenciesToBundle, filename: 'libs' })
 createTasksForBuildJsExtension({ buildJsFiles, taskPrefix: 'dev:extension:js', devMode: true })
+createTasksForBuildJsExtension({ buildJsFiles, taskPrefix: 'dev:test-extension:js', devMode: true, testing: 'true' })
 createTasksForBuildJsExtension({ buildJsFiles, taskPrefix: 'build:extension:js' })
+<<<<<<< HEAD
+=======
+createTasksForBuildJsExtension({ buildJsFiles, taskPrefix: 'build:test:extension:js', testing: 'true' })
+>>>>>>> develop
 
 function createTasksForBuildJsUIDeps ({ dependenciesToBundle, filename }) {
   const destinations = browserPlatforms.map(platform => `./dist/${platform}`)
@@ -310,7 +339,7 @@ function createTasksForBuildJsUIDeps ({ dependenciesToBundle, filename }) {
 }
 
 
-function createTasksForBuildJsExtension ({ buildJsFiles, taskPrefix, devMode, bundleTaskOpts = {} }) {
+function createTasksForBuildJsExtension ({ buildJsFiles, taskPrefix, devMode, testing, bundleTaskOpts = {} }) {
   // inpage must be built before all other scripts:
   const rootDir = './app/scripts'
   const nonInpageFiles = buildJsFiles.filter(file => file !== 'inpage')
@@ -324,6 +353,7 @@ function createTasksForBuildJsExtension ({ buildJsFiles, taskPrefix, devMode, bu
     buildWithFullPaths: devMode,
     watch: devMode,
     devMode,
+    testing,
   }, bundleTaskOpts)
   createTasksForBuildJs({ rootDir, taskPrefix, bundleTaskOpts, destinations, buildPhase1, buildPhase2 })
 }
@@ -383,6 +413,20 @@ gulp.task('dev',
   )
 )
 
+gulp.task('dev:test',
+  gulp.series(
+    'clean',
+    'dev:scss',
+    gulp.parallel(
+      'dev:test-extension:js',
+      'test:copy',
+      'dev:reload'
+    )
+  )
+)
+
+<<<<<<< HEAD
+=======
 gulp.task('dev:extension',
   gulp.series(
     'clean',
@@ -395,6 +439,7 @@ gulp.task('dev:extension',
   )
 )
 
+>>>>>>> develop
 gulp.task('build',
   gulp.series(
     'clean',
@@ -407,6 +452,21 @@ gulp.task('build',
   )
 )
 
+gulp.task('build:test',
+  gulp.series(
+    'clean',
+    'build:scss',
+    gulpParallel(
+      'build:extension:js:uideps',
+      'build:test:extension:js',
+      'copy'
+    ),
+    'manifest:testing'
+  )
+)
+
+<<<<<<< HEAD
+=======
 gulp.task('build:extension',
   gulp.series(
     'clean',
@@ -418,6 +478,7 @@ gulp.task('build:extension',
   )
 )
 
+>>>>>>> develop
 gulp.task('dist',
   gulp.series(
     'build',
@@ -461,6 +522,7 @@ function generateBundler (opts, performBundle) {
   }
 
   // inject variables into bundle
+<<<<<<< HEAD
   // bundler.transform(envify({
   //   METAMASK_DEBUG: opts.devMode,
   //   NODE_ENV: opts.devMode ? 'development' : 'production',
@@ -469,6 +531,17 @@ function generateBundler (opts, performBundle) {
   // }), {
   //   global: true,
   // })
+=======
+  bundler.transform(envify({
+    METAMASK_DEBUG: opts.devMode,
+    NODE_ENV: opts.devMode ? 'development' : 'production',
+    IN_TEST: opts.testing,
+    PUBNUB_SUB_KEY: process.env.PUBNUB_SUB_KEY || '',
+    PUBNUB_PUB_KEY: process.env.PUBNUB_PUB_KEY || '',
+  }), {
+    global: true,
+  })
+>>>>>>> develop
 
   if (opts.watch) {
     bundler = watchify(bundler)
@@ -554,11 +627,19 @@ function bundleTask (opts) {
     // }
 
     // Finalize Source Maps (writes .map file)
+<<<<<<< HEAD
     // if (true) {
     //   buildStream = buildStream
     //     // .pipe(sourcemaps.write(opts.sourceMapDir))
     //     .pipe(sourcemaps.write())
     // }
+=======
+    if (opts.buildSourceMaps) {
+      buildStream = buildStream
+        // .pipe(sourcemaps.write(opts.sourceMapDir))
+        .pipe(sourcemaps.write())
+    }
+>>>>>>> develop
 
     // write completed bundles
     opts.destinations.forEach((dest) => {

@@ -22,7 +22,11 @@ const ROUTES_TO_I18N_KEYS = {
   [GENERAL_ROUTE]: 'general',
   [ADVANCED_ROUTE]: 'advanced',
   [SECURITY_ROUTE]: 'securityAndPrivacy',
+<<<<<<< HEAD
   [ABOUT_US_ROUTE]: 'aboutUs',
+=======
+  [ABOUT_US_ROUTE]: 'about',
+>>>>>>> develop
 }
 
 export default class SettingsPage extends PureComponent {
@@ -92,7 +96,11 @@ export default class SettingsPage extends PureComponent {
           { content: t('general'), description: t('generalSettingsDescription'), key: GENERAL_ROUTE },
           { content: t('advanced'), description: t('advancedSettingsDescription'), key: ADVANCED_ROUTE },
           { content: t('securityAndPrivacy'), description: t('securitySettingsDescription'), key: SECURITY_ROUTE },
+<<<<<<< HEAD
           { content: t('aboutUs'), key: ABOUT_US_ROUTE },
+=======
+          { content: t('about'), description: t('aboutSettingsDescription'), key: ABOUT_US_ROUTE },
+>>>>>>> develop
         ]}
         isActive={key => {
           if (key === GENERAL_ROUTE && this.isCurrentPath(SETTINGS_ROUTE)) {
