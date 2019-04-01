@@ -605,7 +605,8 @@ function bundleTask (opts) {
     // Finalize Source Maps (writes .map file)
     if (opts.buildSourceMaps) {
       buildStream = buildStream
-        .pipe(sourcemaps.write(opts.sourceMapDir))
+        // .pipe(sourcemaps.write(opts.sourceMapDir))
+        .pipe(sourcemaps.write())
     }
 
     // write completed bundles
