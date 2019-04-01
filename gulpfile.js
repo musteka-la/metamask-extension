@@ -438,9 +438,13 @@ function zipTask (target) {
 function generateBundler (opts, performBundle) {
   const browserifyOpts = assign({}, watchify.args, {
     plugin: 'browserify-derequire',
-    debug: opts.buildSourceMaps,
+    debug: true,
     fullPaths: opts.buildWithFullPaths,
   })
+
+  console.log('BROSERIFY OPTIONS!!!!!!!')
+  console.dir(browserifyOpts)
+  console.log('BROSERIFY OPTIONS!!!!!!!')
 
   if (!opts.buildLib) {
     browserifyOpts['entries'] = [opts.filepath]
@@ -457,14 +461,14 @@ function generateBundler (opts, performBundle) {
   }
 
   // inject variables into bundle
-  bundler.transform(envify({
-    METAMASK_DEBUG: opts.devMode,
-    NODE_ENV: opts.devMode ? 'development' : 'production',
-    PUBNUB_SUB_KEY: process.env.PUBNUB_SUB_KEY || '',
-    PUBNUB_PUB_KEY: process.env.PUBNUB_PUB_KEY || '',
-  }), {
-    global: true,
-  })
+  // bundler.transform(envify({
+  //   METAMASK_DEBUG: opts.devMode,
+  //   NODE_ENV: opts.devMode ? 'development' : 'production',
+  //   PUBNUB_SUB_KEY: process.env.PUBNUB_SUB_KEY || '',
+  //   PUBNUB_PUB_KEY: process.env.PUBNUB_PUB_KEY || '',
+  // }), {
+  //   global: true,
+  // })
 
   if (opts.watch) {
     bundler = watchify(bundler)
@@ -533,27 +537,28 @@ function bundleTask (opts) {
       .pipe(buffer())
 
     // Initialize Source Maps
-    if (opts.buildSourceMaps) {
-      buildStream = buildStream
-        // loads map from browserify file
-        .pipe(sourcemaps.init({ loadMaps: true }))
-    }
+    // if (opts.buildSourceMaps) {
+    //   buildStream = buildStream
+    //     // loads map from browserify file
+    //     .pipe(sourcemaps.init({ loadMaps: true }))
+    // }
 
     // Minification
-    if (opts.minifyBuild) {
-      buildStream = buildStream
-      .pipe(uglify({
-        mangle: {
-          reserved: [ 'MetamaskInpageProvider' ],
-        },
-      }))
-    }
+    // if (opts.minifyBuild) {
+    //   buildStream = buildStream
+    //   .pipe(uglify({
+    //     mangle: {
+    //       reserved: [ 'MetamaskInpageProvider' ],
+    //     },
+    //   }))
+    // }
 
     // Finalize Source Maps (writes .map file)
-    if (opts.buildSourceMaps) {
-      buildStream = buildStream
-        .pipe(sourcemaps.write(opts.sourceMapDir))
-    }
+    // if (true) {
+    //   buildStream = buildStream
+    //     // .pipe(sourcemaps.write(opts.sourceMapDir))
+    //     .pipe(sourcemaps.write())
+    // }
 
     // write completed bundles
     opts.destinations.forEach((dest) => {

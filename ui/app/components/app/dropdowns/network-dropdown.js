@@ -207,6 +207,28 @@ NetworkDropdown.prototype.render = function () {
     h(
       DropdownMenuItem,
       {
+        key: 'kitsunet',
+        closeMenu: () => this.props.hideNetworkDropdown(),
+        onClick: () => this.handleClick('kitsunet'),
+        style: dropdownMenuItemStyle,
+      },
+      [
+        providerType === 'kitsunet' ? h('i.fa.fa-check') : h('.network-check__transparent', '✓'),
+        h(NetworkDropdownIcon, {
+          backgroundColor: '#f6c343', // $saffron
+          isSelected: providerType === 'kitsunet',
+        }),
+        h('span.network-name-item', {
+          style: {
+            color: providerType === 'kitsunet' ? '#ffffff' : '#9b9b9b',
+          },
+        }, this.context.t('kitsunet')),
+      ]
+    ),
+
+    h(
+      DropdownMenuItem,
+      {
         key: 'default',
         closeMenu: () => this.props.hideNetworkDropdown(),
         onClick: () => this.handleClick('localhost'),
