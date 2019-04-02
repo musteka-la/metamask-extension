@@ -158,7 +158,7 @@ setupMetamaskMeshMetrics()
  * Initializes the MetaMask controller, and sets up all platform configuration.
  * @returns {Promise} Setup complete.
  */
-async function initialize() {
+async function initialize () {
   const initState = await loadStateFromPersistence()
   const initLangCode = await getFirstPreferredLangCode()
   await setupController(initState, initLangCode)
@@ -174,7 +174,7 @@ async function initialize() {
  * Migrates that data schema in case it was last loaded on an older version.
  * @returns {Promise<MetaMaskState>} Last data emitted from previous instance of MetaMask.
  */
-async function loadStateFromPersistence() {
+async function loadStateFromPersistence () {
   // migrations
   const migrator = new Migrator({ migrations })
 
@@ -246,7 +246,7 @@ async function loadStateFromPersistence() {
  * @param {String} initLangCode - The region code for the language preferred by the current user.
  * @returns {Promise} After setup is complete.
  */
-async function setupController(initState, initLangCode) {
+async function setupController (initState, initLangCode) {
   //
   // MetaMask Controller
   //
@@ -299,12 +299,12 @@ async function setupController(initState, initLangCode) {
    * @param {Object} state - The state object as emitted by the MetaMaskController.
    * @returns {VersionedData} The state object wrapped in an object that includes a metadata key.
    */
-  function versionifyData(state) {
+  function versionifyData (state) {
     versionedData.data = state
     return versionedData
   }
 
-  async function persistData(state) {
+  async function persistData (state) {
     if (!state) {
       throw new Error('MetaMask - updated state is missing', state)
     }
@@ -353,7 +353,7 @@ async function setupController(initState, initLangCode) {
    * This method identifies trusted (MetaMask) interfaces, and connects them differently from untrusted (web pages).
    * @param {Port} remotePort - The port provided by a new context.
    */
-  function connectRemote(remotePort) {
+  function connectRemote (remotePort) {
     const processName = remotePort.name
     const isMetaMaskInternalProcess = metamaskInternalProcessHash[processName]
 
@@ -400,7 +400,7 @@ async function setupController(initState, initLangCode) {
   }
 
   // communication with page or other extension
-  function connectExternal(remotePort) {
+  function connectExternal (remotePort) {
     const originDomain = urlUtil.parse(remotePort.sender.url).hostname
     const portStream = new PortStream(remotePort)
     controller.setupUntrustedCommunication(portStream, originDomain)
@@ -421,7 +421,7 @@ async function setupController(initState, initLangCode) {
    * Updates the Web Extension's "badge" number, on the little fox in the toolbar.
    * The number reflects the current number of pending transactions or message signatures needing user approval.
    */
-  function updateBadge() {
+  function updateBadge () {
     let label = ''
     const unapprovedTxCount = controller.txController.getUnapprovedTxCount()
     const unapprovedMsgCount = controller.messageManager.unapprovedMsgCount
@@ -446,7 +446,7 @@ async function setupController(initState, initLangCode) {
 /**
  * Opens the browser popup for user confirmation
  */
-function triggerUi() {
+function triggerUi () {
   extension.tabs.query({ active: true }, tabs => {
     const currentlyActiveMetamaskTab = Boolean(tabs.find(tab => openMetamaskTabsIDs[tab.id]))
     if (!popupIsOpen && !currentlyActiveMetamaskTab && !notificationIsOpen) {
@@ -460,7 +460,7 @@ function triggerUi() {
  * Opens the browser popup for user confirmation of watchAsset
  * then it waits until user interact with the UI
  */
-function openPopup() {
+function openPopup () {
   triggerUi()
   return new Promise(
     (resolve) => {

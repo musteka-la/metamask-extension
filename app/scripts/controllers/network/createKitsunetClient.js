@@ -30,7 +30,7 @@ module.exports = async function () {
     identity,
     libp2pAddrs: [
       // `/dns4/signaller.lab.metamask.io/tcp/443/wss/p2p-webrtc-star/ipfs/${clientId}`
-      `/ip4/127.0.0.1/tcp/9090/ws/p2p-webrtc-star/ipfs/${clientId}`
+      `/ip4/127.0.0.1/tcp/9090/ws/p2p-webrtc-star/ipfs/${clientId}`,
     ],
     NODE_ENV: devMode ? 'dev' : 'prod',
     sliceDepth: 10,
@@ -38,13 +38,13 @@ module.exports = async function () {
     ethAddrs: [
       '0x52bc44d5378309ee2abf1539bf71de1b7d7be3b5',
       '0x6810e776880c02933d47db1b9fc05908e5386b96',
-      '0x1d805bc00b8fa3c96ae6c8fa97b2fd24b19a9801'
+      '0x1d805bc00b8fa3c96ae6c8fa97b2fd24b19a9801',
     ],
     libp2pBootstrap: [
-      '/ip4/127.0.0.1/tcp/30334/ws/ipfs/QmUA1Ghihi5u3gDwEDxhbu49jU42QPbvHttZFwB6b4K5oC'
+      '/ip4/127.0.0.1/tcp/30334/ws/ipfs/QmUA1Ghihi5u3gDwEDxhbu49jU42QPbvHttZFwB6b4K5oC',
     ],
     slicePath: ['8e99', '1372'],
-    dialInterval: 10000
+    dialInterval: 10000,
   })
 
   // block tracker
@@ -65,7 +65,7 @@ module.exports = async function () {
   return { networkMiddleware, blockTracker }
 }
 
-function createKitsunetMiddleware({ kitsunet }) {
+function createKitsunetMiddleware ({ kitsunet }) {
   return scaffold({
     eth_getBlockByNumber: createAsyncMiddleware(async (req, res, next) => {
       const [blockRef] = req.params
@@ -81,12 +81,12 @@ function createKitsunetMiddleware({ kitsunet }) {
     }),
     net_version: createAsyncMiddleware(async (req, res, next) => {
       res.result = MAINNET_CODE
-    })
+    }),
   })
 }
 
 class KsnBlockTracker extends EE {
-  constructor(client) {
+  constructor (client) {
     super()
     this.client = client
     this.current = null
@@ -99,22 +99,22 @@ class KsnBlockTracker extends EE {
     this.client.on('sync', ({ newBlock, oldBlock }) => {
       this.emit('sync', {
         newBlock: newBlock ? utils.addHexPrefix(newBlock.header.number.toString('hex')) : '0x0',
-        oldBlock: oldBlock ? utils.addHexPrefix(oldBlock.header.number.toString('hex')) : '0x0'
+        oldBlock: oldBlock ? utils.addHexPrefix(oldBlock.header.number.toString('hex')) : '0x0',
       })
     })
   }
 
-  async getLatestBlock() {
+  async getLatestBlock () {
     const block = await this.client.getLatestBlock()
     return utils.addHexPrefix(block.header.number.toString('hex'))
   }
 
-  getCurrentBlock() {
+  getCurrentBlock () {
     return this.current
   }
 }
 
-function blockToRpc(block) {
+function blockToRpc (block) {
   const jsonBlock = block.toJSON(true)
   return {
     parentHash: jsonBlock.header.parentHash,

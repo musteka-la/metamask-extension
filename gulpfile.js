@@ -41,8 +41,8 @@ const uiDependenciesToBundle = [
   ...d3Dependencies,
 ]
 
-function gulpParallel(...args) {
-  return function spawnGulpChildProcess(cb) {
+function gulpParallel (...args) {
+  return function spawnGulpChildProcess (cb) {
     return gulpMultiProcess(args, cb, true)
   }
 }
@@ -111,7 +111,7 @@ createCopyTasks('manifest', {
   destinations: browserPlatforms.map(platform => `./dist/${platform}`),
 })
 
-function createCopyTasks(label, opts) {
+function createCopyTasks (label, opts) {
   if (!opts.devOnly) {
     const copyTaskName = `copy:${label}`
     copyTask(copyTaskName, opts)
@@ -122,7 +122,7 @@ function createCopyTasks(label, opts) {
   copyDevTaskNames.push(copyDevTaskName)
 }
 
-function copyTask(taskName, opts) {
+function copyTask (taskName, opts) {
   const source = opts.source
   const destination = opts.destination
   const destinations = opts.destinations || [destination]
@@ -140,7 +140,7 @@ function copyTask(taskName, opts) {
     return performCopy()
   })
 
-  function performCopy() {
+  function performCopy () {
     // stream from source
     let stream = gulp.src(source + pattern, { base: source })
 
@@ -254,7 +254,7 @@ gulp.task('dev:scss', createScssBuildTask({
   pattern: 'ui/app/**/*.scss',
 }))
 
-function createScssBuildTask({ src, dest, devMode, pattern }) {
+function createScssBuildTask ({ src, dest, devMode, pattern }) {
   return function () {
     if (devMode) {
       watch(pattern, async (event) => {
@@ -267,7 +267,7 @@ function createScssBuildTask({ src, dest, devMode, pattern }) {
     return buildScss()
   }
 
-  function buildScssWithSourceMaps() {
+  function buildScssWithSourceMaps () {
     return gulp.src(src)
       .pipe(sourcemaps.init())
       .pipe(sass().on('error', sass.logError))
@@ -276,7 +276,7 @@ function createScssBuildTask({ src, dest, devMode, pattern }) {
       .pipe(gulp.dest(dest))
   }
 
-  function buildScss() {
+  function buildScss () {
     return gulp.src(src)
       .pipe(sass().on('error', sass.logError))
       .pipe(autoprefixer())
@@ -318,7 +318,7 @@ createTasksForBuildJsExtension({ buildJsFiles, taskPrefix: 'dev:test-extension:j
 createTasksForBuildJsExtension({ buildJsFiles, taskPrefix: 'build:extension:js' })
 createTasksForBuildJsExtension({ buildJsFiles, taskPrefix: 'build:test:extension:js', testing: 'true' })
 
-function createTasksForBuildJsUIDeps({ dependenciesToBundle, filename }) {
+function createTasksForBuildJsUIDeps ({ dependenciesToBundle, filename }) {
   const destinations = browserPlatforms.map(platform => `./dist/${platform}`)
 
 
@@ -339,7 +339,7 @@ function createTasksForBuildJsUIDeps({ dependenciesToBundle, filename }) {
 }
 
 
-function createTasksForBuildJsExtension({ buildJsFiles, taskPrefix, devMode, testing, bundleTaskOpts = {} }) {
+function createTasksForBuildJsExtension ({ buildJsFiles, taskPrefix, devMode, testing, bundleTaskOpts = {} }) {
   // inpage must be built before all other scripts:
   const rootDir = './app/scripts'
   const nonInpageFiles = buildJsFiles.filter(file => file !== 'inpage')
@@ -358,7 +358,7 @@ function createTasksForBuildJsExtension({ buildJsFiles, taskPrefix, devMode, tes
   createTasksForBuildJs({ rootDir, taskPrefix, bundleTaskOpts, destinations, buildPhase1, buildPhase2 })
 }
 
-function createTasksForBuildJs({ rootDir, taskPrefix, bundleTaskOpts, destinations, buildPhase1 = [], buildPhase2 = [] }) {
+function createTasksForBuildJs ({ rootDir, taskPrefix, bundleTaskOpts, destinations, buildPhase1 = [], buildPhase2 = [] }) {
   // bundle task for each file
   const jsFiles = [].concat(buildPhase1, buildPhase2)
   jsFiles.forEach((jsFile) => {
@@ -388,7 +388,7 @@ gulp.task('disc', gulp.parallel(buildJsFiles.map(jsFile => `disc:${jsFile}`)))
 
 // clean dist
 
-gulp.task('clean', function clean() {
+gulp.task('clean', function clean () {
   return del(['./dist/*'])
 })
 
@@ -482,7 +482,7 @@ gulp.task('dist',
 
 // task generators
 
-function zipTask(target) {
+function zipTask (target) {
   return () => {
     return gulp.src(`dist/${target}/**`)
       .pipe(zip(`metamask-${target}-${manifest.version}.zip`))
@@ -490,11 +490,11 @@ function zipTask(target) {
   }
 }
 
-function generateBundler(opts, performBundle) {
+function generateBundler (opts, performBundle) {
   const browserifyOpts = assign({}, watchify.args, {
     plugin: 'browserify-derequire',
     debug: true,
-    fullPaths: opts.buildWithFullPaths
+    fullPaths: opts.buildWithFullPaths,
   })
 
   if (!opts.buildLib) {
@@ -537,7 +537,7 @@ function generateBundler(opts, performBundle) {
   return bundler
 }
 
-function discTask(opts) {
+function discTask (opts) {
   opts = Object.assign({
     buildWithFullPaths: true,
   }, opts)
@@ -548,7 +548,7 @@ function discTask(opts) {
 
   return performBundle
 
-  function performBundle() {
+  function performBundle () {
     // start "disc" build
     const discDir = path.join(__dirname, 'disc')
     mkdirp.sync(discDir)
@@ -563,14 +563,14 @@ function discTask(opts) {
 }
 
 
-function bundleTask(opts) {
+function bundleTask (opts) {
   const bundler = generateBundler(opts, performBundle)
   // output build logs to terminal
   bundler.on('log', gutil.log)
 
   return performBundle
 
-  function performBundle() {
+  function performBundle () {
     let buildStream = bundler.bundle()
 
     // handle errors
@@ -624,6 +624,6 @@ function bundleTask(opts) {
   }
 }
 
-function beep() {
+function beep () {
   process.stdout.write('\x07')
 }
