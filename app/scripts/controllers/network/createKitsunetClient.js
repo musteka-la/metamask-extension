@@ -79,7 +79,15 @@ function createKitsunetMiddleware ({ kitsunet }) {
       if (!block) return next()
       res.result = blockToRpc(block)
     }),
-    net_version: createAsyncMiddleware(async (req, res, next) => {
+    eth_getBlockNumber: createAsyncMiddleware(async (req, res, next) => {
+      const block = await kitsunet.getLatestBlock()
+      console.log(`got block: `)
+      console.dir(block.header.number.toString('hex'))
+      if (!block) return next()
+      res.result = blockToRpc(block)
+      console.dir(res.result)
+    }),
+    net_version: createAsyncMiddleware(async () => {
       res.result = MAINNET_CODE
     }),
   })
@@ -132,7 +140,6 @@ function blockToRpc (block) {
     extraData: jsonBlock.header.extraData,
     mixHash: jsonBlock.header.mixHash,
     nonce: jsonBlock.header.nonce,
-    transactions: jsonBlock.transactions,
-    transactionsRoot: jsonBlock.transactionsRoot,
+    transactions: jsonBlock.transactions
   }
 }
