@@ -6,13 +6,15 @@ const PeerId = require('peer-id')
 const PeerInfo = require('peer-info')
 const pify = require('pify')
 
+const { MAINNET_CODE } = require('./enums')
+
 const mergeMiddleware = require('json-rpc-engine/src/mergeMiddleware')
 const createBlockRefRewriteMiddleware = require('eth-json-rpc-middleware/block-ref-rewrite')
 const createAsyncMiddleware = require('json-rpc-engine/src/createAsyncMiddleware')
 const providerFromMiddleware = require('eth-json-rpc-middleware/providerFromMiddleware')
 const createSliceMiddleware = require('eth-json-rpc-kitsunet-slice')
 const scaffold = require('eth-json-rpc-middleware/scaffold')
-// const createVmMiddleware = require('eth-json-rpc-middleware/vm')
+const createVmMiddleware = require('eth-json-rpc-middleware/vm')
 
 const utils = require('ethereumjs-util')
 const createKitsunet = require('kitsunet')
@@ -49,21 +51,21 @@ module.exports = async function () {
   const blockTracker = new KsnBlockTracker(kitsunet)
 
   // create higher level
-  const provider = providerFromMiddleware(createBlockMiddleware({ kitsunet }))
+  const provider = providerFromMiddleware(createKitsunetMiddleware({ kitsunet }))
 
   // add handlers
   const networkMiddleware = mergeMiddleware([
-    createBlockMiddleware({ kitsunet }),
+    createKitsunetMiddleware({ kitsunet }),
     createBlockRefRewriteMiddleware({ blockTracker }),
     createSliceMiddleware({ kitsunet, depth: 10 }),
-    // createVmMiddleware({ provider }),
+    createVmMiddleware({ provider }),
   ])
 
   await kitsunet.start()
   return { networkMiddleware, blockTracker }
 }
 
-function createBlockMiddleware({ kitsunet }) {
+function createKitsunetMiddleware({ kitsunet }) {
   return scaffold({
     eth_getBlockByNumber: createAsyncMiddleware(async (req, res, next) => {
       const [blockRef] = req.params
@@ -76,6 +78,9 @@ function createBlockMiddleware({ kitsunet }) {
 
       if (!block) return next()
       res.result = blockToRpc(block)
+    }),
+    net_version: createAsyncMiddleware(async (req, res, next) => {
+      res.result = MAINNET_CODE
     })
   })
 }

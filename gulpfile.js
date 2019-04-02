@@ -494,8 +494,7 @@ function generateBundler(opts, performBundle) {
   const browserifyOpts = assign({}, watchify.args, {
     plugin: 'browserify-derequire',
     debug: true,
-    fullPaths: opts.buildWithFullPaths,
-    ignoreTransform: 'babelify'
+    fullPaths: opts.buildWithFullPaths
   })
 
   if (!opts.buildLib) {
@@ -503,11 +502,7 @@ function generateBundler(opts, performBundle) {
   }
 
   let bundler = browserify(browserifyOpts)
-  bundler.transform(babelify.configure({ ...babelConfig },
-    { 
-      global: true,
-      ignore: [/\.\/node_modules\/(?!ethereumjs-vm\/)/]
-    }))
+  bundler.transform(babelify)
   bundler.transform(brfs)
 
 
