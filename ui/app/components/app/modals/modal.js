@@ -2,11 +2,7 @@ const Component = require('react').Component
 const h = require('react-hyperscript')
 const inherits = require('util').inherits
 const connect = require('react-redux').connect
-<<<<<<< HEAD:ui/app/components/app/modals/modal.js
-const FadeModal = require('boron').FadeModal
-=======
 const FadeModal = require('boron-15').FadeModal
->>>>>>> develop:ui/app/components/app/modals/modal.js
 const actions = require('../../../store/actions')
 const { resetCustomData: resetCustomGasData } = require('../../../ducks/gas/gas.duck')
 const isMobileView = require('../../../../lib/is-mobile-view')

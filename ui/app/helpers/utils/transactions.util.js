@@ -21,10 +21,7 @@ import {
   CANCEL_ATTEMPT_ACTION_KEY,
 } from '../constants/transactions'
 
-<<<<<<< HEAD:ui/app/helpers/utils/transactions.util.js
-=======
 import log from 'loglevel'
->>>>>>> develop:ui/app/helpers/utils/transactions.util.js
 import { addCurrencies } from './conversion-util'
 
 abiDecoder.addABI(abi)
