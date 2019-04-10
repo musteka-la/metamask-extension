@@ -10,6 +10,8 @@ const createMetamaskMiddleware = require('./createMetamaskMiddleware')
 const createInfuraClient = require('./createInfuraClient')
 const createJsonRpcClient = require('./createJsonRpcClient')
 const createLocalhostClient = require('./createLocalhostClient')
+const createKitsunetClient = require('./createKitsunetClient')
+
 const { createSwappableProxy, createEventEmitterProxy } = require('swappable-obj-proxy')
 const extend = require('extend')
 const networks = { networkList: {} }
@@ -65,10 +67,10 @@ module.exports = class NetworkController extends EventEmitter {
     this._blockTrackerProxy = null
   }
 
-  initializeProvider (providerParams) {
+  async initializeProvider (providerParams) {
     this._baseProviderParams = providerParams
     const { type, rpcTarget, chainId, ticker, nickname } = this.providerStore.getState()
-    this._configureProvider({ type, rpcTarget, chainId, ticker, nickname })
+    await this._configureProvider({ type, rpcTarget, chainId, ticker, nickname })
     this.lookupNetwork()
   }
 
@@ -141,8 +143,8 @@ module.exports = class NetworkController extends EventEmitter {
   }
 
   async setProviderType (type) {
-    assert.notEqual(type, 'rpc', `NetworkController - cannot call "setProviderType" with type 'rpc'. use "setRpcTarget"`)
-    assert(INFURA_PROVIDER_TYPES.includes(type) || type === LOCALHOST, `NetworkController - Unknown rpc type "${type}"`)
+    // assert.notEqual(type, 'rpc', `NetworkController - cannot call "setProviderType" with type 'rpc'. use "setRpcTarget"`)
+    // assert(INFURA_PROVIDER_TYPES.includes(type) || type === LOCALHOST, `NetworkController - Unknown rpc type "${type}"`)
     const providerConfig = { type }
     this.providerConfig = providerConfig
   }
@@ -164,13 +166,13 @@ module.exports = class NetworkController extends EventEmitter {
   // Private
   //
 
-  _switchNetwork (opts) {
+  async _switchNetwork (opts) {
     this.setNetworkState('loading')
-    this._configureProvider(opts)
+    await this._configureProvider(opts)
     this.emit('networkDidChange', opts.type)
   }
 
-  _configureProvider (opts) {
+  async _configureProvider (opts) {
     const { type, rpcTarget, chainId, ticker, nickname } = opts
     // infura type-based endpoints
     const isInfura = INFURA_PROVIDER_TYPES.includes(type)
@@ -182,6 +184,8 @@ module.exports = class NetworkController extends EventEmitter {
     // url-based rpc endpoints
     } else if (type === 'rpc') {
       this._configureStandardProvider({ rpcUrl: rpcTarget, chainId, ticker, nickname })
+    } else if (type === 'kitsunet') {
+      await this._configureKitsunetProvider({})
     } else {
       throw new Error(`NetworkController - _configureProvider - unknown type "${type}"`)
     }
@@ -201,6 +205,12 @@ module.exports = class NetworkController extends EventEmitter {
   _configureLocalhostProvider () {
     log.info('NetworkController - configureLocalhostProvider')
     const networkClient = createLocalhostClient({ platform: this.platform })
+    this._setNetworkClient(networkClient)
+  }
+
+  async _configureKitsunetProvider () {
+    log.info('NetworkController - configureKitsunetProvider')
+    const networkClient = await createKitsunetClient({})
     this._setNetworkClient(networkClient)
   }
 

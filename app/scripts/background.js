@@ -180,8 +180,8 @@ async function loadStateFromPersistence () {
   // read from disk
   // first from preferred, async API:
   versionedData = (await localStore.get()) ||
-                  diskStore.getState() ||
-                  migrator.generateInitialState(firstTimeState)
+    diskStore.getState() ||
+    migrator.generateInitialState(firstTimeState)
 
   // check if somehow state is empty
   // this should never happen but new error reporting suggests that it has
@@ -245,7 +245,7 @@ async function loadStateFromPersistence () {
  * @param {String} initLangCode - The region code for the language preferred by the current user.
  * @returns {Promise} After setup is complete.
  */
-function setupController (initState, initLangCode) {
+async function setupController (initState, initLangCode) {
   //
   // MetaMask Controller
   //
@@ -263,8 +263,10 @@ function setupController (initState, initLangCode) {
     initLangCode,
     // platform specific api
     platform,
-    encryptor: isEdge ? new EdgeEncryptor() : undefined,
+    // encryptor: isEdge ? new EdgeEncryptor() : undefined,
   })
+
+  await controller.init()
 
   const provider = controller.provider
   setupEnsIpfsResolver({ provider })
@@ -472,7 +474,7 @@ function openPopup () {
 }
 
 // On first install, open a new tab with MetaMask
-extension.runtime.onInstalled.addListener(({reason}) => {
+extension.runtime.onInstalled.addListener(({ reason }) => {
   if ((reason === 'install') && (!METAMASK_DEBUG)) {
     platform.openExtensionInBrowser()
   }

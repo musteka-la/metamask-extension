@@ -25,6 +25,9 @@ const uglify = require('gulp-uglify-es').default
 const pify = require('pify')
 const gulpMultiProcess = require('gulp-multi-process')
 const endOfStream = pify(require('end-of-stream'))
+const brfs = require('brfs')
+const babelify = require('babelify')
+const babelConfig = require('./babel.config')
 
 const packageJSON = require('./package.json')
 const dependencies = Object.keys(packageJSON && packageJSON.dependencies || {})
@@ -154,26 +157,26 @@ function copyTask (taskName, opts) {
 
 gulp.task('manifest:chrome', function () {
   return gulp.src('./dist/chrome/manifest.json')
-  .pipe(jsoneditor(function (json) {
-    delete json.applications
-    return json
-  }))
-  .pipe(gulp.dest('./dist/chrome', { overwrite: true }))
+    .pipe(jsoneditor(function (json) {
+      delete json.applications
+      return json
+    }))
+    .pipe(gulp.dest('./dist/chrome', { overwrite: true }))
 })
 
 gulp.task('manifest:opera', function () {
   return gulp.src('./dist/opera/manifest.json')
-  .pipe(jsoneditor(function (json) {
-    json.permissions = [
-      'storage',
-      'tabs',
-      'clipboardWrite',
-      'clipboardRead',
-      'http://localhost:8545/',
-    ]
-    return json
-  }))
-  .pipe(gulp.dest('./dist/opera', { overwrite: true }))
+    .pipe(jsoneditor(function (json) {
+      json.permissions = [
+        'storage',
+        'tabs',
+        'clipboardWrite',
+        'clipboardRead',
+        'http://localhost:8545/',
+      ]
+      return json
+    }))
+    .pipe(gulp.dest('./dist/opera', { overwrite: true }))
 })
 
 gulp.task('manifest:production', function () {
@@ -182,32 +185,32 @@ gulp.task('manifest:production', function () {
     './dist/chrome/manifest.json',
     './dist/edge/manifest.json',
     './dist/opera/manifest.json',
-  ], {base: './dist/'})
+  ], { base: './dist/' })
 
-  // Exclude chromereload script in production:
-  .pipe(jsoneditor(function (json) {
-    json.background.scripts = json.background.scripts.filter((script) => {
-      return !script.includes('chromereload')
-    })
-    return json
-  }))
+    // Exclude chromereload script in production:
+    .pipe(jsoneditor(function (json) {
+      json.background.scripts = json.background.scripts.filter((script) => {
+        return !script.includes('chromereload')
+      })
+      return json
+    }))
 
-  .pipe(gulp.dest('./dist/', { overwrite: true }))
+    .pipe(gulp.dest('./dist/', { overwrite: true }))
 })
 
 gulp.task('manifest:testing', function () {
   return gulp.src([
     './dist/firefox/manifest.json',
     './dist/chrome/manifest.json',
-  ], {base: './dist/'})
+  ], { base: './dist/' })
 
-  // Exclude chromereload script in production:
-  .pipe(jsoneditor(function (json) {
-    json.permissions = [...json.permissions, 'webRequestBlocking']
-    return json
-  }))
+    // Exclude chromereload script in production:
+    .pipe(jsoneditor(function (json) {
+      json.permissions = [...json.permissions, 'webRequestBlocking']
+      return json
+    }))
 
-  .pipe(gulp.dest('./dist/', { overwrite: true }))
+    .pipe(gulp.dest('./dist/', { overwrite: true }))
 })
 
 gulp.task('copy',
@@ -482,15 +485,15 @@ gulp.task('dist',
 function zipTask (target) {
   return () => {
     return gulp.src(`dist/${target}/**`)
-    .pipe(zip(`metamask-${target}-${manifest.version}.zip`))
-    .pipe(gulp.dest('builds'))
+      .pipe(zip(`metamask-${target}-${manifest.version}.zip`))
+      .pipe(gulp.dest('builds'))
   }
 }
 
 function generateBundler (opts, performBundle) {
   const browserifyOpts = assign({}, watchify.args, {
     plugin: 'browserify-derequire',
-    debug: opts.buildSourceMaps,
+    debug: true,
     fullPaths: opts.buildWithFullPaths,
   })
 
@@ -499,6 +502,8 @@ function generateBundler (opts, performBundle) {
   }
 
   let bundler = browserify(browserifyOpts)
+  bundler.transform('babelify')
+  bundler.transform('brfs')
 
   if (opts.buildLib) {
     bundler = bundler.require(opts.dependenciesToBundle)
@@ -512,12 +517,9 @@ function generateBundler (opts, performBundle) {
   bundler.transform(envify({
     METAMASK_DEBUG: opts.devMode,
     NODE_ENV: opts.devMode ? 'development' : 'production',
-    IN_TEST: opts.testing,
     PUBNUB_SUB_KEY: process.env.PUBNUB_SUB_KEY || '',
     PUBNUB_PUB_KEY: process.env.PUBNUB_PUB_KEY || '',
-  }), {
-    global: true,
-  })
+  }))
 
   if (opts.watch) {
     bundler = watchify(bundler)
@@ -551,8 +553,8 @@ function discTask (opts) {
 
     return (
       bundler.bundle()
-      .pipe(disc())
-      .pipe(fs.createWriteStream(discPath))
+        .pipe(disc())
+        .pipe(fs.createWriteStream(discPath))
     )
   }
 }
@@ -595,17 +597,18 @@ function bundleTask (opts) {
     // Minification
     if (opts.minifyBuild) {
       buildStream = buildStream
-      .pipe(uglify({
-        mangle: {
-          reserved: [ 'MetamaskInpageProvider' ],
-        },
-      }))
+        .pipe(uglify({
+          mangle: {
+            reserved: ['MetamaskInpageProvider'],
+          },
+        }))
     }
 
     // Finalize Source Maps (writes .map file)
     if (opts.buildSourceMaps) {
       buildStream = buildStream
-        .pipe(sourcemaps.write(opts.sourceMapDir))
+        // .pipe(sourcemaps.write(opts.sourceMapDir))
+        .pipe(sourcemaps.write())
     }
 
     // write completed bundles
