@@ -140,6 +140,6 @@ function blockToRpc (block) {
     extraData: jsonBlock.header.extraData,
     mixHash: jsonBlock.header.mixHash,
     nonce: jsonBlock.header.nonce,
-    transactions: jsonBlock.transactions
+    transactions: jsonBlock.transactions,
   }
 }

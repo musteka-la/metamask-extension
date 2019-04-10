@@ -502,9 +502,8 @@ function generateBundler (opts, performBundle) {
   }
 
   let bundler = browserify(browserifyOpts)
-  bundler.transform(babelify)
-  bundler.transform(brfs)
-
+  bundler.transform('babelify')
+  bundler.transform('brfs')
 
   if (opts.buildLib) {
     bundler = bundler.require(opts.dependenciesToBundle)
@@ -515,14 +514,12 @@ function generateBundler (opts, performBundle) {
   }
 
   // inject variables into bundle
-  // bundler.transform(envify({
-  //   METAMASK_DEBUG: opts.devMode,
-  //   NODE_ENV: opts.devMode ? 'development' : 'production',
-  //   PUBNUB_SUB_KEY: process.env.PUBNUB_SUB_KEY || '',
-  //   PUBNUB_PUB_KEY: process.env.PUBNUB_PUB_KEY || '',
-  // }), {
-  //   global: true,
-  // })
+  bundler.transform(envify({
+    METAMASK_DEBUG: opts.devMode,
+    NODE_ENV: opts.devMode ? 'development' : 'production',
+    PUBNUB_SUB_KEY: process.env.PUBNUB_SUB_KEY || '',
+    PUBNUB_PUB_KEY: process.env.PUBNUB_PUB_KEY || '',
+  }))
 
   if (opts.watch) {
     bundler = watchify(bundler)
